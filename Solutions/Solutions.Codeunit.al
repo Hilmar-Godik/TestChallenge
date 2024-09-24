@@ -118,18 +118,12 @@ codeunit 50125 "Solutions"
         HexDictionary: Dictionary of [Integer, Char];
         quotient: BigInteger;
         Done: Boolean;
-        TBuilder: TextBuilder;
-    // NumberOfIntegers: Integer;
-    // MaxDict: Dictionary of [BigInteger, Text[16]];
     begin
         // The function is supposed to convert an integer to hexadecimal.
         // More details can be deducted from the test itself.
         // Implement your solution here.
         if int < 0 then
             exit('');
-
-        TBuilder.AppendLine('Hello World');
-        Message(TBuilder.ToText());
 
         PopulateHexList(HexList);
         // PopulateMaxDict(MaxDict);

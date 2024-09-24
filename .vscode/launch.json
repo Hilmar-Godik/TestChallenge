@@ -9,7 +9,7 @@
             "server": "http://TestChallenge",
             "serverInstance": "BC",
             "authentication": "UserPassword",
-            "startupObjectId": 130401,
+            "startupObjectId": 130451,
             "breakOnError": "ExcludeTry",
             "breakOnRecordWrite": "None",
             "launchBrowser": true,

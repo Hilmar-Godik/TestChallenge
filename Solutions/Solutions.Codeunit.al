@@ -115,15 +115,12 @@ codeunit 50125 "Solutions"
         // TypeHelper: Codeunit "Type Helper";
         Index: Integer;
         HexList: List of [Char];
-        Remainder: Decimal;
-        RemainderDict: Dictionary of [Integer, Char];
-        HexNumber: Char;
-        HexNumberList: List of [Char];
-        HexBuilder: TextBuilder;
+        HexDictionary: Dictionary of [Integer, Char];
         quotient: BigInteger;
         Done: Boolean;
-        NumberOfIntegers: Integer;
-        MaxDict: Dictionary of [BigInteger, Text];
+        TBuilder: TextBuilder;
+    // NumberOfIntegers: Integer;
+    // MaxDict: Dictionary of [BigInteger, Text[16]];
     begin
         // The function is supposed to convert an integer to hexadecimal.
         // More details can be deducted from the test itself.
@@ -131,35 +128,88 @@ codeunit 50125 "Solutions"
         if int < 0 then
             exit('');
 
-        PopulateHexList(HexList);
-        PopulateMaxDict(MaxDict);
+        TBuilder.AppendLine('Hello World');
+        Message(TBuilder.ToText());
 
-        if MaxDict.ContainsKey(int) then
-            exit(CopyStr(MaxDict.Get(int), 1, 16));
+        PopulateHexList(HexList);
+        // PopulateMaxDict(MaxDict);
 
         quotient := int;
-        NumberOfIntegers := StrLen(Format(int));
-        repeat
+
+        // if MaxDict.ContainsKey(quotient) then
+        //     exit(MaxDict.Get(quotient));        
+
+        while not Done do begin
             Index += 1;
-            Remainder := quotient mod 16;
-            Remainder := Round(Remainder, 1, '<');
-            RemainderDict.Add(Index, HexList.Get(Remainder + 1));
+            AddToHexDictionary(Index,
+                                HexList,
+                                quotient,
+                                HexDictionary);
+            if not TryUpdateQuotient(quotient) then
+                Done := true;
+        end;
 
-            quotient := Round(quotient / 16, 1, '<');
-            if quotient < 2 then
-                if Round(quotient, 0.00001, '=') < 1 then
-                    Done := true;
-        until Done or (Index = NumberOfIntegers);
+        exit(GetHexValueBasedOnDictionary(HexDictionary));
+    end;
 
-        HexNumberList := RemainderDict.Values;
+    local procedure AddToHexDictionary(Index: Integer; HexList: List of [Char]; quotient: BigInteger; var HexDictionary: Dictionary of [Integer, Char])
+    var
+        Remainder: Decimal;
+    begin
+        Remainder := quotient mod 16;
+        HexDictionary.Add(Index, HexList.Get(Remainder + 1));
+    end;
+
+    local procedure GetHexValueBasedOnDictionary(var HexDictionary: Dictionary of [Integer, Char]): Text[16]
+    var
+        HexNumber: Char;
+        HexNumberList: List of [Char];
+        HexBuilder: TextBuilder;
+    begin
+        HexNumberList := HexDictionary.Values;
         HexNumberList.Reverse();
         foreach HexNumber in HexNumberList do
             HexBuilder.Append(HexNumber);
 
         exit(CopyStr(HexBuilder.ToText(), 1, 16));
-
-        // exit(CopyStr(TypeHelper.IntToHex(int), 1, 16));
     end;
+
+    // [TryFunction]
+    local procedure TryUpdateQuotient(var Quotient: BigInteger): Boolean
+    begin
+        if Quotient < 16 then
+            exit(false);
+        // Error('');
+
+        Quotient := quotient div 16;
+        exit(true);
+    end;
+
+    local procedure PopulateHexList(var HexList: List of [Char])
+    begin
+        HexList.AddRange('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F');
+    end;
+
+    // local procedure PopulateMaxDict(var MaxDict: Dictionary of [BigInteger, Text[16]])
+    // begin
+    //     Clear(MaxDict);
+    //     MaxDict.Add(15, 'F');
+    //     MaxDict.Add(255, 'FF');
+    //     MaxDict.Add(4095, 'FFF');
+    //     MaxDict.Add(65535, 'FFFF');
+    //     MaxDict.Add(1048575, 'FFFFF');
+    //     MaxDict.Add(16777215, 'FFFFFF');
+    //     MaxDict.Add(268435455, 'FFFFFFF');
+    //     MaxDict.Add(4294967295L, 'FFFFFFFF');
+    //     MaxDict.Add(68719476735L, 'FFFFFFFFF');
+    //     MaxDict.Add(1099511627775L, 'FFFFFFFFFF');
+    //     MaxDict.Add(17592186044415L, 'FFFFFFFFFFF');
+    //     MaxDict.Add(281474976710655L, 'FFFFFFFFFFFF');
+    //     MaxDict.Add(4503599627370495L, 'FFFFFFFFFFFFF');
+    //     MaxDict.Add(72057594037927935L, 'FFFFFFFFFFFFFF');
+    //     MaxDict.Add(1152921504606846975L, 'FFFFFFFFFFFFFFF');
+    //     MaxDict.Add(9223372036854775807L, '7FFFFFFFFFFFFFFF');
+    // end;
 
 
     [TryFunction]
@@ -182,31 +232,7 @@ codeunit 50125 "Solutions"
         exit(true);
     end;
 
-    local procedure PopulateHexList(var HexList: List of [Char])
-    begin
-        HexList.AddRange('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F');
-    end;
 
-    local procedure PopulateMaxDict(var MaxDict: Dictionary of [BigInteger, Text])
-    begin
-        Clear(MaxDict);
-        MaxDict.Add(15, 'F');
-        MaxDict.Add(255, 'FF');
-        MaxDict.Add(4095, 'FFF');
-        MaxDict.Add(65535, 'FFFF');
-        MaxDict.Add(1048575, 'FFFFF');
-        MaxDict.Add(16777215, 'FFFFFF');
-        MaxDict.Add(268435455, 'FFFFFFF');
-        MaxDict.Add(4294967295L, 'FFFFFFFF');
-        MaxDict.Add(68719476735L, 'FFFFFFFFF');
-        MaxDict.Add(1099511627775L, 'FFFFFFFFFF');
-        MaxDict.Add(17592186044415L, 'FFFFFFFFFFF');
-        MaxDict.Add(281474976710655L, 'FFFFFFFFFFFF');
-        MaxDict.Add(4503599627370495L, 'FFFFFFFFFFFFF');
-        MaxDict.Add(72057594037927935L, 'FFFFFFFFFFFFFF');
-        MaxDict.Add(1152921504606846975L, 'FFFFFFFFFFFFFFF');
-        MaxDict.Add(9223372036854775807L, '7FFFFFFFFFFFFFFF');
-    end;
 
 }
 
